@@ -4,4 +4,4 @@ import dotenv from "dotenv";
 // .env configured
 dotenv.config();
 
-console.log("Dastur ishga tushmoqda...");
+console.log("Dastur ishga tushmoqda... ");
