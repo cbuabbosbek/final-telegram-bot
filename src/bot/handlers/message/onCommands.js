@@ -34,7 +34,35 @@ async function onCommands(msg) {
   if (text == "/users") {
     const userSoni = await User.countDocuments();
 
-    return bot.sendMessage(chatId, `Foydanuvchilar [${userSoni}]:`);
+    const allUsers = await User.find();
+    bot.sendMessage(chatId, `Foydanuvchilar [${userSoni}]:`);
+
+    console.log(allUsers);
+    // bot.sendMessage(chatId, allUsers.toString());
+
+    for (let user of allUsers) {
+      bot.sendMessage(chatId, `${user.firstname} -> ${user.chatId}`);
+    }
+    return;
+  }
+
+  if (text == "/profile") {
+    const existingUser = await User.findOne({ chatId: chatId });
+
+    console.log(existingUser);
+
+    return bot.sendMessage(
+      chatId,
+      `
+Mening Profilim:\n
+|--chatId: ${existingUser.chatId}
+|--ism: ${existingUser.firstname} 
+|--username: ${existingUser.username}
+|--active: ${existingUser.active}
+|--balance: ${existingUser.balance}
+|___________
+    `
+    );
   }
 
   return bot.sendMessage(chatId, `Xatolik, buyruq topilmadi... /start bosing!`);
