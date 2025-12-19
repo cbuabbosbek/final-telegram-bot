@@ -1,5 +1,7 @@
 import User from "../../../models/User.js";
 import { bot } from "../../bot.js";
+import onProfile from "./commands/onProfile.js";
+import onStart from "./commands/onStart.js";
 
 async function onCommands(msg) {
   const chatId = msg.chat.id;
@@ -7,51 +9,18 @@ async function onCommands(msg) {
   const text = msg.text;
 
   if (text == "/start") {
-    const existingUser = await User.findOne({ chatId: chatId });
-
-    if (!existingUser) {
-      const newUser = new User({
-        chatId: chatId,
-        firstname: firstname,
-        username: msg.chat.username,
-      });
-
-      newUser.save();
-    } else {
-      console.log(existingUser);
-    }
-
-    return bot.sendMessage(
-      chatId,
-      `
-          👋 Assalomu alaykum, ${firstname}!
-  
-  📚 100x Academy o‘quv markazining rasmiy botiga xush kelibsiz!
-  
-  Bu bot orqali siz:
-  • Kurslarimiz haqida batafsil ma’lumot olasiz  
-  • Kurslarga onlayn ro‘yxatdan o‘tishingiz mumkin  
-  • Jadval va to‘lovlar haqida ma’lumot olasiz  
-  
-  Quyidagi menyudan kerakli bo‘limni tanlang 👇
-  
-          `,
-      {
-        reply_markup: {
-          keyboard: [
-            [{ text: "📚 Kurslar" }, { text: "✍️ Ro‘yxatdan o‘tish" }],
-            [{ text: "ℹ️ Markaz haqida" }, { text: "💬 Fikr bildirish" }],
-            [{ text: "❓ Yordam" }],
-          ],
-          resize_keyboard: true,
-        },
-      }
-    );
+    return onStart(msg);
   }
 
   if (text == "/help") {
     return bot.sendMessage(chatId, `Yordam kerakmi, ${firstname}?`);
   }
+
+  // let chatIds = [875054546, 544654665, 4564564];
+
+  // for (let cId of chatIds) {
+  //   bot.sendMessage(cId, "Salom");
+  // }
 
   if (text == "/users") {
     const userSoni = await User.countDocuments();
@@ -69,22 +38,7 @@ async function onCommands(msg) {
   }
 
   if (text == "/profile") {
-    const existingUser = await User.findOne({ chatId: chatId });
-
-    console.log(existingUser);
-
-    return bot.sendMessage(
-      chatId,
-      `
-Mening Profilim:\n
-|--chatId: ${existingUser.chatId}
-|--ism: ${existingUser.firstname} 
-|--username: ${existingUser.username}
-|--active: ${existingUser.active}
-|--balance: ${existingUser.balance}
-|___________
-    `
-    );
+    return onProfile(msg);
   }
 
   return bot.sendMessage(chatId, `Xatolik, buyruq topilmadi... /start bosing!`);

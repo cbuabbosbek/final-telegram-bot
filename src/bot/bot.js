@@ -2,8 +2,11 @@ import TelegramBot from "node-telegram-bot-api";
 import dotenv from "dotenv";
 import onCommands from "./handlers/message/onCommands.js";
 import onError from "./handlers/message/onError.js";
+import onCourses from "./handlers/message/onCourses.js";
+import User from "../models/User.js";
 dotenv.config();
 const CHANNEL_ID = "@academy_100x_uz";
+const ADMIN_ID = 875072364;
 
 export const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
@@ -11,6 +14,8 @@ bot.on("message", async function (msg) {
   const chatId = msg.chat.id;
   const firstname = msg.chat.first_name;
   const text = msg.text;
+
+  let user = await User.findOne({ chatId });
 
   const chatMember = await bot.getChatMember(CHANNEL_ID, chatId);
 
@@ -44,6 +49,46 @@ bot.on("message", async function (msg) {
 
   if (text.startsWith("/")) {
     return onCommands(msg);
+  }
+
+  if (text == "📚 Kurslar") {
+    return onCourses(msg);
+  }
+
+  if (text == "✍️ Ro‘yxatdan o‘tish") {
+    if (!user) return;
+
+    user = await User.findOneAndUpdate({ chatId }, { action: "awaiting_name" });
+
+    return bot.sendMessage(chatId, `Ismingizni kiriting:`);
+  }
+
+  // action
+  if (user.action == "awaiting_name") {
+    console.log("name: ", text);
+
+    user = await User.findOneAndUpdate(
+      { chatId },
+      { action: "awaiting_phone", name: text }
+    );
+
+    return bot.sendMessage(chatId, `Telefon nomeringiz kiriting:`);
+  }
+
+  if (user.action == "awaiting_phone") {
+    console.log("phone: ", text);
+
+    user = await User.findOneAndUpdate(
+      { chatId },
+      { action: "finish_registration", phone: text }
+    );
+
+    bot.sendMessage(
+      ADMIN_ID,
+      `Yangi xabar 🔔\n--FIO: ${user.name}\n--Telefon: ${text}`
+    );
+
+    return bot.sendMessage(chatId, `Tabriklaymiz siz ro'yhatdan o'tdingiz! ✅`);
   }
 
   return onError();

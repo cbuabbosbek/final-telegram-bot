@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 4000,
     },
+    action: {
+      type: String,
+      default: "user_created",
+    },
+    name: String,
+    phone: String,
   },
   { timestamps: true }
 );
